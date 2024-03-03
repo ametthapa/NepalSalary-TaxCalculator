@@ -4,7 +4,7 @@ import HomePage from "./container/HomePage";
 function App() {
   return (
     <div className="App">
-      This is the Nepal Salary Tax Calculator page
+      <p>This is the Nepal Salary Tax Calculator page</p>
       <HomePage />
     </div>
   );
