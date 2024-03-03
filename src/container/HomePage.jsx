@@ -1,5 +1,4 @@
 import React from "react";
-import Button from "@mui/material/Button";
 import "./HomePage.css";
 import FirstBlock from "../component/FirstBlock";
 
@@ -12,7 +11,6 @@ const HomePage = () => {
       <div>
         <FirstBlock />
       </div>
-      <Button variant="contained">Hello world</Button>
     </div>
   );
 };
