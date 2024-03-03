@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/NepalSalary-TaxCalculator/static/css/main.2506bc5d.css",
+    "main.js": "/NepalSalary-TaxCalculator/static/js/main.24dbdc2d.js",
+    "index.html": "/NepalSalary-TaxCalculator/index.html",
+    "main.2506bc5d.css.map": "/NepalSalary-TaxCalculator/static/css/main.2506bc5d.css.map",
+    "main.24dbdc2d.js.map": "/NepalSalary-TaxCalculator/static/js/main.24dbdc2d.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.2506bc5d.css",
+    "static/js/main.24dbdc2d.js"
+  ]
+}
