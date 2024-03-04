@@ -1,0 +1,46 @@
+<div className="container-firstHead">
+          <div>
+            <label htmlFor="maritalStatus" className="container-label">
+              Marital status :
+            </label>
+            <select
+              name="maritalStatus"
+              id="maritalStatus"
+              className="container-firstHead_Select"
+              onChange={handleDropdownChange}
+              value={data.maritalStatus}
+            >
+              <option value="married">Married</option>
+              <option value="unmarried">Unmarried</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="gender" className="container-label">
+              Gender :
+            </label>
+            <select
+              name="gender"
+              id="gender"
+              className="container-firstHead_Select"
+              onChange={handleDropdownChange}
+              value={data.gender}
+            >
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="fiscalYear" className="container-label">
+              Fiscal Year :
+            </label>
+            <select
+              name="fiscalYear"
+              id="fiscalYear"
+              className="container-firstHead_Select"
+              onChange={handleDropdownChange}
+              value={data.fiscalYear}
+            >
+              <option value="80/81">2080/2081</option>
+            </select>
+          </div>
+        </div>

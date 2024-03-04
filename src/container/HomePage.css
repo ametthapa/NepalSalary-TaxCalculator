@@ -1,5 +1,25 @@
 .container {
   width: 80%;
   height: 100vh;
-  background-color: gray;
+  background-color: lavender;
+}
+.container-label {
+  font-weight: 800;
+  padding: 0 10px;
+}
+.container-firstHead {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  padding-bottom: 20px;
+}
+.container-firstHead_Select {
+  width: 150px;
+  height: 30px;
+  padding: 0 10px;
+  background-color: lavender;
+}
+select {
+  border: 1px solid lightgray;
 }
