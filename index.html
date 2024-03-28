@@ -1,0 +1,578 @@
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" /><title>
+	Salary Tax Calculator, Nepal
+</title><meta name="description" content="Salary tax calculator is for calculating tax payable to Nepal government on the salary you earn in a given year." /><meta name="theme-color" content="#25518c" /><link rel="icon" type="image/x-icon" href="favicon.png" />
+    <noscript id="deferred-styles"><link rel="stylesheet" type="text/css" href="css/main.min.css?v=1.0.0" /></noscript>
+    <script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script>
+    <script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-121197197-1"></script>
+
+    <script src="js/jquery-1.6.4.min.js"></script>
+    <script src="js/jquery.popup.js"></script>
+
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'UA-121197197-1');</script>
+   
+    <script>
+var loadDeferredStyles = function () {
+            var addStylesNode = document.getElementById("deferred-styles");
+            var replacement = document.createElement("div");
+            replacement.innerHTML = addStylesNode.textContent;
+            document.body.appendChild(replacement)
+            addStylesNode.parentElement.removeChild(addStylesNode);
+        };
+        var raf = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+            window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+        if (raf) raf(function () { window.setTimeout(loadDeferredStyles, 0); });
+        else window.addEventListener('load', loadDeferredStyles);</script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-121197197-1"></script>
+    <script>
+window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'UA-121197197-1');</script>
+
+
+    <script>
+
+
+        $(document).ready(function () {
+         
+            let date = new Date().getFullYear();
+            $('#spnyear').text(date);
+
+            bindTaxPayerType();
+            bindFiscalYear();
+
+            $("#monthlysal, #month,#bonus").blur(function (e) {
+
+                var monthly_sal = $('#monthlysal').val();
+                if (monthly_sal == "")
+                    monthly_sal = 0;
+                var month = $('#month').val();
+                if (month == "")
+                    month = 0;
+                var bonus = $('#bonus').val();
+                if (bonus == "")
+                    bonus = 0;
+
+
+                var total_salary = (parseFloat(monthly_sal) * parseFloat(month)) + parseFloat(bonus);
+
+                $('#totalsal').val(total_salary);
+            });
+
+            $("#printCalc").click(function (e) {
+                window.print();
+            });
+           
+
+            $("#caltax").click(function (e) {
+
+                var totalSalary = $("#totalsal").val();
+                if (totalSalary <= 0 || totalSalary == "") {
+                    alert("Total salary must not be empty.");
+                }
+                else {
+
+                    eligibleDeduction();
+
+                    //CheckInsurance();
+                    //if (Number($("#ttdn").text()) <= 0)
+                    //    $(".caldetails").hide(), alert("CIT Amount must not be greater than Rs. 300,000 or 33% of Total salary."), $("#cit").val(""), $("#cit").removeAttr("value"), $("#cit").focus();
+                    //else {
+                    //    (first = 0), (second = 0), (third = 0), (fourth = 0), (taxamt = 0);
+                    //    var t = $("#fiscalyear").prop("selectedIndex");
+
+                    //    openPopup();
+                    //    $(".caldetails").show();
+
+                    //    var pfAmount = Number($("#epf").val()),
+                    //        citAmount = Number($("#cit").val()),
+                    //        insuranceAmount = Number($("#ins").val()),
+                    //        total_salary = Number($("#totalsal").val()),
+                    //        total_CIT_PF_Insurance = 0,
+                    //        oneThird_ofTotalSalary = Number(parseFloat(0.33 * total_salary).toFixed(2)),
+                    //        total_CIT_PF = pfAmount + citAmount;
+
+                    //    if (total_CIT_PF > oneThird_ofTotalSalary) {
+
+                    //        alert("EPF + CIT is taken from either the sum is less than or equal to Rs. 300,000 or 33% of Total salary whichever is lower.");
+                    //        $("#sum1").val(oneThird_ofTotalSalary);
+                    //    }
+                    //    else {
+                    //        $("#sum1").val(total_CIT_PF);
+                    //    }
+
+                    //    total_CIT_PF_Insurance = parseFloat(total_CIT_PF + insuranceAmount);
+                    //    $("#ttd").val(total_CIT_PF_Insurance);
+                    //    $("#ins1").val(insuranceAmount);
+                    //    $("#sal").val(total_salary);
+
+                    //    var total = total_salary - total_CIT_PF_Insurance;
+                    //    $("#total").val(parseFloat(total));
+
+                    //}
+                }
+               // calculateTax($("#total").val());
+            });
+
+            $("#closePopup").click(function (e) {
+                $.popup({
+                    content: "myModal",
+                    top: "150",
+                    status: false,
+                });
+            });
+
+            $("#btnresetvalues").click(function (e) {
+
+                $('#monthlysal').val('');
+                $('#bonus').val('');
+                $('#totalsal').val(0);
+                $('#epf').val('');
+                $('#epf').val('');
+                $('#cit').val('');
+                $('#ins').val('');
+                $('#ame').val('');
+
+            });
+        });
+
+        function openPopup() {
+            $.popup({
+                content: "myModal",
+                top: "150",
+                status: true,
+            });
+        }
+     
+        function CheckInsurance() {
+            var insurance_amount = Number($("#ins").val());
+             $("#fiscalyear").prop("selectedIndex") == 0
+                ? insurance_amount >= 0 //&& insurance_amount <= 2e4
+                    ? CheckNegative("ins", insurance_amount)
+                    : (alert("Insurance must be positive"), $("#ins").val(""), $("#ins").focus())
+                : insurance_amount >= 0 //&& insurance_amount <= 25e3
+                    ? CheckNegative("ins", insurance_amount)
+                    : (alert("Insurance must be positive"), $("#ins").val(""), $("#ins").focus());
+        }
+        function CheckNegative(heading, amount) {
+            amount < 0 && ($("#" + heading).val(0), $("#" + heading).focus());
+            var pf_amount = Number($("#epf").val().replace(',')),
+                cit_amount = Number($("#cit").val()),
+                insurance_amount = Number($("#ins").val()),
+                total_deduction = pf_amount + cit_amount + insurance_amount;
+            $("#tdn").text(total_deduction);
+            var total_salary = Number($("#totalsal").val());
+            $("#ttdn").text(total_salary - total_deduction);
+        }
+
+        function eligibleDeduction(totalSal) {
+
+            $('#dvslabDetails').empty();
+            var taxPayerType = $("#ddltaxpayerType").val();
+            var fiscalYear = $("#ddlFiscalYear").val();
+            
+
+            var ssf = $("#ssf").val();
+            if (ssf == "")
+                ssf = 0;
+            var cit = $("#cit").val();
+            if (cit == "")
+                cit = 0;
+            var epf = $("#epf").val();
+            if (epf == "")
+                epf = 0;
+            var ins = $("#ins").val();
+            if (ins == "")
+                ins = 0;
+            var totalSal = $("#totalsal").val();
+
+            PageMethods.geteligibleAmount(taxPayerType, fiscalYear, totalSal, cit, epf, ins, ssf, function (response) {
+                
+                $("#ins1").val(response["accessibleins"]);
+                $("#sum1").val(response["accessiblessfcitpf"]);
+
+                var total_deduction = parseFloat(response["accessibleins"]) + parseFloat(response["accessiblessfcitpf"]) ;
+                $("#ttd").val(total_deduction);
+
+                var total_salary = Number($("#totalsal").val());
+                $("#sal").val(total_salary);
+                
+
+                var total = parseFloat(totalSal) - parseFloat(total_deduction);
+                $("#total").val(parseFloat(total));
+
+                calculateTax(totalSal);
+            });
+        }
+
+        function calculateTax(totalSal) {
+
+            $('#dvslabDetails').empty();
+
+            var taxPayerType = $("#ddltaxpayerType").val();
+            var fiscalYear = $("#ddlFiscalYear").val();
+            var inputMonth = $("#month").val();
+
+            if (inputMonth == "" || inputMonth == 0)
+                inputMonth = 12;
+
+            var ssf = $("#ssf").val();
+            if (ssf == "")
+                ssf = 0;
+            var cit = $("#cit").val();
+            if (cit == "")
+                cit = 0;
+            var epf = $("#epf").val();
+            if (epf == "")
+                epf = 0;
+            var ins = $("#ins").val();
+            if (ins == "")
+                ins = 0;
+
+            PageMethods.getSlabAmount(taxPayerType, fiscalYear, totalSal, cit, epf, ins, ssf, function (response) {
+
+
+                var totalAssesibleIncome = 0;
+                var totalTaxLiability = 0;
+                $("#dvslabDetails").append("<tr><th>Assesible Income (Rs.) </th><th>Rate (%) </th><th>Tax Liability (Rs.) </th></tr>");
+                for (var i = 0; i < response.length; i++) {
+
+                    $("#dvslabDetails").append("<tr><td>" + parseFloat(response[i].AssesibleIncome).toLocaleString() + "</td><td>" + response[i].Rate + "</td><td>" + parseFloat(response[i].TaxLiability).toLocaleString() + "</td></tr>")
+                    totalAssesibleIncome = parseFloat(totalAssesibleIncome) + parseFloat(response[i].AssesibleIncome);
+
+                    totalTaxLiability = parseFloat(totalTaxLiability) + parseFloat(response[i].TaxLiability);
+                };
+                $("#dvslabDetails").append("<tr class='total-wrapper'><td>Rs." + parseFloat(totalAssesibleIncome).toLocaleString() + "</td><td></td><td>Rs." + parseFloat(totalTaxLiability).toLocaleString() + "</td></tr>")
+
+                /*$("#dvslabDetails").append("<tr><td colspan='2'>Medical Tax:<td><strong><span class='hide-sm'>Rs. 0</span> <span class='number' id='medtax1'></span></strong></td></tr>");*/
+
+                $("#dvslabDetails").append("<tr><td colspan='2'>Net Tax Liability (Monthly):<td><strong><span class='hide-sm'>Rs. " + (parseFloat(totalTaxLiability) / parseFloat(inputMonth)).toLocaleString() + " </span> <span class='number' id='monthlyTL'></span></strong></td></tr>");
+                $("#dvslabDetails").append("<tr><td colspan='2'>Net Tax Liability (Yearly):<td><strong><span class='hide-sm'>Rs. " + parseFloat(totalTaxLiability).toLocaleString() + " </span> <span class='number' id='gt'></span></strong></td></tr>");
+
+                $('#topmonthlyTL').text((parseFloat(totalTaxLiability) / parseFloat(inputMonth)).toLocaleString());
+                $('#top-gt').text(parseFloat(totalTaxLiability).toLocaleString());
+
+                openPopup();
+                $(".caldetails").show();
+            });
+        }
+
+        function bindTaxPayerType() {
+            PageMethods.bindTaxPayerType(function (response) {
+                $("#ddltaxpayerType").empty();
+                $.each(response, function (data, value) {
+                    $("#ddltaxpayerType").append($("<option></option>").val(value.TaxPayerTypeID).html(value.TaxPayerType));
+                })
+            });
+        }
+
+        function bindFiscalYear() {
+            PageMethods.bindFiscalYear(function (response) {
+                $("#ddlFiscalYear").empty();
+                $.each(response, function (data, value) {
+                    $("#ddlFiscalYear").append($("<option></option>").val(value.YearId).html(value.Year));
+                })
+            });
+        }
+
+      
+
+    </script>
+
+    <style>
+        .opacity {
+            opacity: 0;
+        }
+        .modal-active {
+            top: auto !important;
+            left: auto !important;
+            background-color: rgba(0,0,0,0.5);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed !important;
+        }
+        .modal-dialog {
+            overflow: auto;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+     <form method="post" action="./" id="form2">
+<div class="aspNetHidden">
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" />
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/QFlW5bhGMOwWzjL7qcOaBWAGrtlKXDdSbWJRehYkfD/6A4qkeTIg0Min5d9QRlBFlgWJHNW5OgAy2joDE77q9t2JD79AxlJOk7che+XK0E=" />
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['form2'];
+if (!theForm) {
+    theForm = document.form2;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="/WebResource.axd?d=pynGkmcFUV13He1Qd6_TZLKDpDLFN55_G0GheUaj-g6uNpH6x-AXIrN-SV6AYFov2ZReq-8vULfgJCJRkBPjRw2&amp;t=636958978847961167" type="text/javascript"></script>
+
+
+<script src="/ScriptResource.axd?d=NJmAwtEo3Ipnlaxl6CMhvpUXMm74C2s49e-cWTTChyG6y2-zmkCK61Y8zVE_jIh6tT_vsLGv1AoZljaPkhe2biQO35P1y395P0yv9P5Nxag93MuX8ydHBjCXosshwPNde-FNck_JqQqBZ0wg4GUNVyLb-eALJx7pi9q1vEB60DA1&amp;t=ffffffff999c3159" type="text/javascript"></script>
+<script src="/ScriptResource.axd?d=dwY9oWetJoJoVpgL6Zq8ODvbpc38N_4IO0-1oMpYnGt2m5oKjIUDFLQxuQZHt6cPX9qlRJfcJR1my7UrZSD4lK8h3vZbhr39QwK6yMNA22ttirVthjHjGBCuFrin5XXcFLvk7ywqsexqox2od8Hh8xnKQgppQdfUeo2_iNIiqpw1&amp;t=ffffffff999c3159" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+var PageMethods = function() {
+PageMethods.initializeBase(this);
+this._timeout = 0;
+this._userContext = null;
+this._succeeded = null;
+this._failed = null;
+}
+PageMethods.prototype = {
+_get_path:function() {
+ var p = this.get_path();
+ if (p) return p;
+ else return PageMethods._staticInstance.get_path();},
+bindTaxPayerType:function(succeededCallback, failedCallback, userContext) {
+return this._invoke(this._get_path(), 'bindTaxPayerType',false,{},succeededCallback,failedCallback,userContext); },
+bindFiscalYear:function(succeededCallback, failedCallback, userContext) {
+return this._invoke(this._get_path(), 'bindFiscalYear',false,{},succeededCallback,failedCallback,userContext); },
+getSlabAmount:function(taxPayerTypeid,fiscalYear,totalSal,cit,epf,ins,ssf,succeededCallback, failedCallback, userContext) {
+return this._invoke(this._get_path(), 'getSlabAmount',false,{taxPayerTypeid:taxPayerTypeid,fiscalYear:fiscalYear,totalSal:totalSal,cit:cit,epf:epf,ins:ins,ssf:ssf},succeededCallback,failedCallback,userContext); },
+geteligibleAmount:function(taxPayerTypeid,fiscalYear,totalSal,cit,epf,ins,ssf,succeededCallback, failedCallback, userContext) {
+return this._invoke(this._get_path(), 'geteligibleAmount',false,{taxPayerTypeid:taxPayerTypeid,fiscalYear:fiscalYear,totalSal:totalSal,cit:cit,epf:epf,ins:ins,ssf:ssf},succeededCallback,failedCallback,userContext); }}
+PageMethods.registerClass('PageMethods',Sys.Net.WebServiceProxy);
+PageMethods._staticInstance = new PageMethods();
+PageMethods.set_path = function(value) { PageMethods._staticInstance.set_path(value); }
+PageMethods.get_path = function() { return PageMethods._staticInstance.get_path(); }
+PageMethods.set_timeout = function(value) { PageMethods._staticInstance.set_timeout(value); }
+PageMethods.get_timeout = function() { return PageMethods._staticInstance.get_timeout(); }
+PageMethods.set_defaultUserContext = function(value) { PageMethods._staticInstance.set_defaultUserContext(value); }
+PageMethods.get_defaultUserContext = function() { return PageMethods._staticInstance.get_defaultUserContext(); }
+PageMethods.set_defaultSucceededCallback = function(value) { PageMethods._staticInstance.set_defaultSucceededCallback(value); }
+PageMethods.get_defaultSucceededCallback = function() { return PageMethods._staticInstance.get_defaultSucceededCallback(); }
+PageMethods.set_defaultFailedCallback = function(value) { PageMethods._staticInstance.set_defaultFailedCallback(value); }
+PageMethods.get_defaultFailedCallback = function() { return PageMethods._staticInstance.get_defaultFailedCallback(); }
+PageMethods.set_enableJsonp = function(value) { PageMethods._staticInstance.set_enableJsonp(value); }
+PageMethods.get_enableJsonp = function() { return PageMethods._staticInstance.get_enableJsonp(); }
+PageMethods.set_jsonpCallbackParameter = function(value) { PageMethods._staticInstance.set_jsonpCallbackParameter(value); }
+PageMethods.get_jsonpCallbackParameter = function() { return PageMethods._staticInstance.get_jsonpCallbackParameter(); }
+PageMethods.set_path("Main.aspx");
+PageMethods.bindTaxPayerType= function(onSuccess,onFailed,userContext) {PageMethods._staticInstance.bindTaxPayerType(onSuccess,onFailed,userContext); }
+PageMethods.bindFiscalYear= function(onSuccess,onFailed,userContext) {PageMethods._staticInstance.bindFiscalYear(onSuccess,onFailed,userContext); }
+PageMethods.getSlabAmount= function(taxPayerTypeid,fiscalYear,totalSal,cit,epf,ins,ssf,onSuccess,onFailed,userContext) {PageMethods._staticInstance.getSlabAmount(taxPayerTypeid,fiscalYear,totalSal,cit,epf,ins,ssf,onSuccess,onFailed,userContext); }
+PageMethods.geteligibleAmount= function(taxPayerTypeid,fiscalYear,totalSal,cit,epf,ins,ssf,onSuccess,onFailed,userContext) {PageMethods._staticInstance.geteligibleAmount(taxPayerTypeid,fiscalYear,totalSal,cit,epf,ins,ssf,onSuccess,onFailed,userContext); }
+var gtc = Sys.Net.WebServiceProxy._generateTypedConstructor;
+Type.registerNamespace('SalaryTaxCalculator.App_Code.BLL');
+if (typeof(SalaryTaxCalculator.App_Code.BLL.TaxPayer) === 'undefined') {
+SalaryTaxCalculator.App_Code.BLL.TaxPayer=gtc("SalaryTaxCalculator.App_Code.BLL.TaxPayer");
+SalaryTaxCalculator.App_Code.BLL.TaxPayer.registerClass('SalaryTaxCalculator.App_Code.BLL.TaxPayer');
+}
+if (typeof(SalaryTaxCalculator.App_Code.BLL.FiscalYear) === 'undefined') {
+SalaryTaxCalculator.App_Code.BLL.FiscalYear=gtc("SalaryTaxCalculator.App_Code.BLL.FiscalYear");
+SalaryTaxCalculator.App_Code.BLL.FiscalYear.registerClass('SalaryTaxCalculator.App_Code.BLL.FiscalYear');
+}
+if (typeof(SalaryTaxCalculator.App_Code.BLL.TaxSlab) === 'undefined') {
+SalaryTaxCalculator.App_Code.BLL.TaxSlab=gtc("SalaryTaxCalculator.App_Code.BLL.TaxSlab");
+SalaryTaxCalculator.App_Code.BLL.TaxSlab.registerClass('SalaryTaxCalculator.App_Code.BLL.TaxSlab');
+}
+if (typeof(SalaryTaxCalculator.App_Code.BLL.EligibleDeductionAmount) === 'undefined') {
+SalaryTaxCalculator.App_Code.BLL.EligibleDeductionAmount=gtc("SalaryTaxCalculator.App_Code.BLL.EligibleDeductionAmount");
+SalaryTaxCalculator.App_Code.BLL.EligibleDeductionAmount.registerClass('SalaryTaxCalculator.App_Code.BLL.EligibleDeductionAmount');
+}
+//]]>
+</script>
+
+<div class="aspNetHidden">
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="202EA31B" />
+</div>
+    <div class="wrapper">
+   <header>
+      <div class="container"><a href="https://www.eattendance.com/" target="_blank"><img src="images/eattendance.gif" alt="ads" class="desktop"> <img src="images/eattendance-mobile.gif" alt="ads" class="mobile"></a></div>
+   </header>
+   <main id="main">
+
+      <div class="container">
+         <h1>SALARY TAX CALCULATOR, NEPAL</h1>
+         <div class="form-wrapper">
+           
+                <script type="text/javascript">
+//<![CDATA[
+Sys.WebForms.PageRequestManager._initialize('ScriptManager1', 'form2', [], [], [], 90, '');
+//]]>
+</script>
+
+               <div class="form-row">
+                  <div class="row">
+                     <div class="col-sm-6">
+                        <div class="form-group"><label class="control-label">Nature of Employee</label>
+                         
+
+                            <select name="ddltaxpayerType" id="ddltaxpayerType" class="form-control">
+
+</select>
+                            
+                            </div>
+                     </div>
+                     <div class="col-sm-6">
+                        <div class="form-group">
+                           <label class="control-label">Fiscal Year</label> 
+
+                            <select name="ddlFiscalYear" id="ddlFiscalYear" class="form-control">
+
+</select>
+                         
+                        </div>
+                     </div>                  
+                  </div>
+               </div>
+
+               <div class="form-row">
+                  <div class="row">
+                     <div class="col-sm-6">
+                        <h2>Annual Income</h2>
+                        <div class="form-group"><label class="control-label">Monthly Salary</label> <input type="number" onkeypress="if(this.value.length==8) return false;" id="monthlysal" class="form-control" maxlength="8"></div>
+                        <div class="form-group"><label class="control-label">No. of Months</label> <input type="number" onkeypress="if(this.value.length==8) return false;" id="month" class="form-control" value="12" maxlength="2"></div>
+                        <div class="form-group"><label class="control-label">Bonus</label> <input type="number" onkeypress="if(this.value.length==8) return false;" id="bonus" class="form-control" maxlength="7"></div>
+                        <div class="form-group line"><label class="control-label">Total Salary</label> <input type="number" onkeypress="if(this.value.length==10) return false;" id="totalsal" class="form-control" maxlength="10"> <input type="hidden" id="deductsal"> <input type="hidden" id="totaldeduction"></div>
+                     </div>
+                     <div class="col-sm-6">
+                        <h2>Annual Deduction</h2>
+                         <div class="form-group"><label class="control-label">Social Security Fund</label> <input type="number" value="0" onkeypress="if(this.value.length==7) return false;" id="ssf" min="0" class="form-control" maxlength="7"></div>
+                        <div class="form-group"><label class="control-label">Employees Provident Fund</label> <input type="number" value="0" onkeypress="if(this.value.length==7) return false;" id="epf" min="0" class="form-control" maxlength="7"></div>
+                        <div class="form-group"><label class="control-label">Citizen Investment Trust</label> <input type="number" value="0" onkeypress="if(this.value.length==7) return false;" id="cit" min="0" class="form-control" maxlength="7"></div>
+                        <div class="form-group"><label class="control-label">Insurance</label> <input type="number" value ="0" onkeypress="if(this.value.length==6) return false;" id="ins" min="0" class="form-control" maxlength="7"></div>
+                     </div>
+                  </div>
+               </div>
+               <div class="form-row hide">
+                  <div class="row">
+                     <div class="col-sm-6 col-md-offset-3">
+                        <div class="form-group">
+                           <label class="control-label full-width">[Total Salary minus(-) Total Deduction]</label>
+                           <div class="form-control" id="ttdn"></div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+             
+               <div class="row">
+                  <div class="col-xs-6"><input type="button" class="btn btn-primary reset" id="btnresetvalues" value="Reset values"></div>
+                  <div class="col-xs-6 text-right"><input type="button" class="btn btn-success" value="Calculate" id="caltax"></div>
+               </div>
+
+         </div>
+            
+         
+         <div class="row">
+            <div class="col-md-12">
+               <p>Salary tax calculator is designed for calculating tax payable to Nepal government on the salary earned in a given year. The calculation is based on Nepal Government Tax Policy.</p>
+               <p>If you have any feedback and suggestion, please write to <a href="mailto:info@eattendance.com">info@eattendance.com</a> or call <a href="tel:9851164319" class="tel">9851190654.</a></p>
+            </div>
+         </div>
+      
+   </main>
+   <div class="share-wrapper"><a href="https://www.facebook.com/sharer/sharer.php?u=https%3A//salarytaxnepal.com" target="_blank"><i class="icon-facebook"></i> </a><a href="https://twitter.com/home?status=https%3A//salarytaxnepal.com" target="_blank"><i class="icon-twitter"></i> </a><a href="https://plus.google.com/share?url=https%3A//salarytaxnepal.com" target="_blank"><i class="icon-gplus"></i> </a><a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A//salarytaxnepal.com&title=Salary%20Tax%20Calculator&summary=&source=" target="_blank"><i class="icon-linkedin"></i></a></div>
+   <footer>
+      <div class="container">
+         <div class="row">
+            <div class="col-sm-9">
+               <p>All text and design is copyright &copy; <span id="spnyear"></span> <a href="https://eattendance.com" target="blank">Eattendance.com</a>. All rights reserved.</p>
+            </div>
+            <div class="col-sm-3">
+               <p class="text-right"><i class="icon-mail-alt"></i> <a href="mailto:info@eattendance.com">info@eattendance.com</a></p>
+            </div>
+         </div>
+      </div>
+   </footer>
+   <div class="modal-active" id="myModal" style="display:none;">
+      <div class="modal-dialog">
+         <div id="popupContent" class="modal-content">
+            <div class="modal-header">
+               <button type="button" class="close" id="closePopup"  data-dismiss="modal" aria-hidden="true">&times;</button>
+               <div class="modal-title">
+                  <span>Net Tax Liability:</span>
+                  <div>Rs. <span class="number" id="topmonthlyTL"></span> (Monthly)</div>
+                  <div>Rs. <span class="number" id="top-gt"></span> (Yearly)</div>
+               </div>
+            </div>
+            <div class="modal-body">
+               <div class="form-row popup-detail">
+                     <div class="form-group">
+                     <label class="control-label">Total Income (TI):</label>
+                     <div class="text-right">Rs. <input type="text" id="sal" readonly="readonly"></div>
+                  </div>
+
+                  <div class="form-group">
+                     <label class="control-label">Sum of SSF, EPF and CIT (SSF+EPF+CIT):</label>
+                     <div class="text-right">Rs. <input type="text" value="Rs" id="sum1" readonly="readonly"></div>
+                  </div>
+                  <div class="form-group">
+                     <label class="control-label">Insurance:</label>
+                     <div class="text-right">Rs. <input type="text" id="ins1" readonly="readonly"></div>
+                  </div>
+                
+                  <div class="form-group">
+                     <label class="control-label">Total Deduction (TD):</label>
+                     <div class="text-right">Rs. <input type="text" id="ttd" readonly="readonly"></div>
+                  </div>
+                  <div class="form-group">
+                     <label class="control-label">Net Assessable (TI-TD):</label>
+                     <div class="text-right">Rs. <input type="text" id="total" readonly="readonly"></div>
+                  </div>
+               </div>
+
+
+                  
+
+
+
+               <div class="form-row">
+                  <div class="scroll-div">
+
+
+                    <table id="dvslabDetails">
+
+                    </table>
+
+                     
+                  </div>
+               </div>
+               <p>* This is rough estimation.
+                   <a href="javacript:;" id="printCalc" class="print btn btn-success btn-sm">&nbsp; Print <i class="icon-print"></i></a>
+               </p>
+            </div>
+         </div>
+         <div class="print-text">
+            <div class="text">
+               <p><strong>Powered by:</strong><br>Eattendance.com (Online Attendance, leave and payroll system)<br>www.eattendance.com<br>Email: info@eattendance.com<br>Phone: 9851164319</p>
+            </div>
+            <div class="eattendance-logo"><img src="images/eattendance-logo.png" alt="Eattendance"></div>
+         </div>
+      </div>
+   </div>
+</div>
+         </form>
+</body>
+</html>
